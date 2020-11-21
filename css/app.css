@@ -1,0 +1,28 @@
+﻿form {
+    width: 75%;
+}
+
+.form-container {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+}
+
+.form-buttons{
+    display: flex;
+    justify-content: center;
+}
+
+.form-buttons button{
+    margin-right: 4px;
+}
+
+.qr-container{
+    display: flex;
+    justify-content: center;
+}
+
+.qr-container img{
+    width: 16rem;
+    height: auto;
+}

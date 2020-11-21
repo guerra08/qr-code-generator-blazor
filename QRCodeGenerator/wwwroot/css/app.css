@@ -1,4 +1,8 @@
-﻿.form-container {
+﻿form {
+    width: 75%;
+}
+
+.form-container {
     display: flex;
     width: 100%;
     justify-content: center;
@@ -21,8 +25,4 @@
 .qr-container img{
     width: 16rem;
     height: auto;
-}
-
-form {
-    width: 75%;
 }

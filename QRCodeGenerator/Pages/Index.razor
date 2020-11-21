@@ -1,0 +1,41 @@
+﻿@page "/"
+
+<div class="title-container">
+    <div class="row justify-content-md-center">
+        <h1>QR Code Generator</h1>
+    </div>
+</div>
+
+<div class="form-container">
+    <EditForm Model="@formSubmission" OnValidSubmit="@HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <InputText id="name" placeholder="Name" @bind-Value="formSubmission.Name" required />
+        <InputText id="email" type="email" placeholder="E-Mail" @bind-Value="formSubmission.Email" required />
+        <InputText id="twitter" placeholder="Twitter" @bind-Value="formSubmission.Twitter" required />
+        <InputText id="github" placeholder="GitHub" @bind-Value="formSubmission.Github" required />
+
+        <button type="submit" class="btn btn-primary">Create</button>
+        <button type="reset" class="btn btn-danger">Cancel</button>
+    </EditForm>
+</div>
+
+@if (image != null)
+{
+    <img src="data:image/png;base64,@Convert.ToBase64String(image)">
+}
+
+@code{
+
+    private Models.FormModel formSubmission = new Models.FormModel();
+    private byte[] image = null;
+
+    private void HandleValidSubmit()
+    {
+        QRCoder.QRCodeGenerator qrGenerator = new QRCoder.QRCodeGenerator();
+        QRCoder.QRCodeData qrData = qrGenerator.CreateQrCode(formSubmission.Email, QRCoder.QRCodeGenerator.ECCLevel.Q);
+        QRCoder.PngByteQRCode qrCode = new QRCoder.PngByteQRCode(qrData);
+        this.image = qrCode.GetGraphic(20);
+    }
+
+}

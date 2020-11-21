@@ -12,4 +12,6 @@ It currently contains:
 - GitHub user
 - Twitter user
 
-Under construction...
+### Use it!
+
+You can use this project here: https://guerra08.github.io/qr-code-generator-blazor/

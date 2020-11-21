@@ -17,6 +17,13 @@
     margin-right: 4px;
 }
 
+.card-qr-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 16px;
+}
+
 .qr-container{
     display: flex;
     justify-content: center;

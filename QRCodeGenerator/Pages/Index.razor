@@ -1,28 +1,41 @@
 ﻿@page "/"
 
 <div class="title-container">
-    <div class="row justify-content-md-center">
-        <h1>QR Code Generator</h1>
-    </div>
+    <h1 style="text-align: center">QR Code Generator</h1>
 </div>
 
 <div class="form-container">
     <EditForm Model="@formSubmission" OnValidSubmit="@HandleValidSubmit">
         <DataAnnotationsValidator />
         <ValidationSummary />
-        <InputText id="name" placeholder="Name" @bind-Value="formSubmission.Name" required />
-        <InputText id="email" type="email" placeholder="E-Mail" @bind-Value="formSubmission.Email" required />
-        <InputText id="twitter" placeholder="Twitter" @bind-Value="formSubmission.Twitter" required />
-        <InputText id="github" placeholder="GitHub" @bind-Value="formSubmission.Github" required />
-
-        <button type="submit" class="btn btn-primary">Create</button>
-        <button type="reset" class="btn btn-danger">Cancel</button>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <InputText id="name" class="form-control" placeholder="Name" @bind-Value="formSubmission.Name" required />
+            </div>
+            <div class="form-group col-md-6">
+                <InputText id="email" class="form-control" type="email" placeholder="E-Mail" @bind-Value="formSubmission.Email" required />
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <InputText id="twitter" class="form-control" placeholder="Twitter" @bind-Value="formSubmission.Twitter" required />
+            </div>
+            <div class="form-group col-md-6">
+                <InputText id="github" class="form-control" placeholder="GitHub" @bind-Value="formSubmission.Github" required />
+            </div>
+        </div>
+        <div class="form-buttons">
+            <button type="submit" class="btn btn-primary">Create</button>
+            <button type="reset" class="btn btn-danger">Cancel</button>
+        </div>
     </EditForm>
 </div>
 
 @if (image != null)
 {
-    <img src="data:image/png;base64,@Convert.ToBase64String(image)">
+    <div class="qr-container">
+        <img src="data:image/png;base64,@Convert.ToBase64String(image)">
+    </div>
 }
 
 @code{
@@ -33,7 +46,13 @@
     private void HandleValidSubmit()
     {
         QRCoder.QRCodeGenerator qrGenerator = new QRCoder.QRCodeGenerator();
-        QRCoder.QRCodeData qrData = qrGenerator.CreateQrCode(formSubmission.Email, QRCoder.QRCodeGenerator.ECCLevel.Q);
+        QRCoder.QRCodeData qrData = qrGenerator.CreateQrCode(
+            String.Format("Name: {0}\nE-Mail: {1}\nTwitter: {2}\nGitHub: {3}", 
+                formSubmission.Name, 
+                formSubmission.Email, 
+                formSubmission.Twitter, 
+                formSubmission.Github), 
+            QRCoder.QRCodeGenerator.ECCLevel.Q);
         QRCoder.PngByteQRCode qrCode = new QRCoder.PngByteQRCode(qrData);
         this.image = qrCode.GetGraphic(20);
     }

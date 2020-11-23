@@ -7,11 +7,12 @@ namespace QRCodeGenerator.Models
         [Required]
         public string Name { get; set; }
         [Required]
-        public string Email { get; set; }
-        [Required]
-        public string Twitter { get; set; }
-        [Required]
-        public string Github { get; set; }
-        
+        public string Content { get; set; }
+
+        public override string ToString()
+        {
+            return Name + ": " + Content + "\n";
+        }
+
     }
 }

@@ -2,70 +2,89 @@
 
 <div class="title-container">
     <h1 style="text-align: center">QR Code Generator</h1>
+    <h3 style="text-align: center">Generate a QR code using whatever text data you want😀</h3>
 </div>
 
 <div class="form-container">
-    <EditForm Model="@formSubmission" OnValidSubmit="@HandleValidSubmit">
+    <EditForm Model="@entries" OnValidSubmit="@HandleValidSubmit">
         <DataAnnotationsValidator />
         <ValidationSummary />
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                <InputText id="name" class="form-control" placeholder="Name" @bind-Value="formSubmission.Name" required />
-            </div>
-            <div class="form-group col-md-6">
-                <InputText id="email" class="form-control" type="email" placeholder="E-Mail" @bind-Value="formSubmission.Email" required />
-            </div>
+        <div class="form-row add-button">
+            <button type="button" class="btn btn-secondary" @onclick="@(() => addEntry())">Add Data</button>
         </div>
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                <InputText id="twitter" class="form-control" placeholder="Twitter" @bind-Value="formSubmission.Twitter" required />
+        @for (var i = 0; i < entries.Count; i++)
+        {
+            var index = i;
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <InputText id="name" class="form-control" placeholder="Name" @bind-Value="entries[index].Name" required />
+                </div>
+                <div class="form-group col-md-6">
+                    <InputText id="content" class="form-control" type="text" placeholder="Content" @bind-Value="entries[index].Content" required />
+                </div>
+                <div class="form-group col-md-6">
+                    <button type="button" class="btn btn-warning" @onclick="@(() => removeEntry(index))">Remove data</button>
+                </div>
             </div>
-            <div class="form-group col-md-6">
-                <InputText id="github" class="form-control" placeholder="GitHub" @bind-Value="formSubmission.Github" required />
+        }
+        @if (entries.Count > 0)
+        {
+            <div class="form-buttons">
+                <button type="submit" class="btn btn-primary">Create</button>
+                <button type="reset" class="btn btn-danger">Cancel</button>
             </div>
-        </div>
-        <div class="form-buttons">
-            <button type="submit" class="btn btn-primary">Create</button>
-            <button type="reset" class="btn btn-danger">Cancel</button>
-        </div>
+        }
     </EditForm>
 </div>
 
-@if (image != null && formSubmission != null)
+@if (image != null && entries.Count > 0)
 {
-<div class="card-qr-container">
-    <div class="card" style="width: 18rem;">
-        <div class="card-body">
-            <h5 class="card-title">@formSubmission.Name</h5>
-            <h6 class="card-subtitle mb-2 text-muted">My information: </h6>
-            <p class="card-text"><strong>E-mail:</strong> @formSubmission.Email</p>
-            <p class="card-text"><strong>Twitter:</strong> @formSubmission.Twitter</p>
-            <p class="card-text"><strong>GitHub:</strong> @formSubmission.Github</p>
+    <div class="card-qr-container">
+        <div class="card" style="width: 18rem;">
+            <div class="card-body">
+                @foreach (var entry in entries)
+                {
+                    <p class="card-text"><strong>@entry.Name:</strong> @entry.Content</p>
+                }
+            </div>
+        </div>
+        <div class="qr-container">
+            <img src="data:image/png;base64,@Convert.ToBase64String(image)">
         </div>
     </div>
-    <div class="qr-container">
-        <img src="data:image/png;base64,@Convert.ToBase64String(image)">
-    </div>
-</div>
 }
 
 @code{
 
-    private Models.FormModel formSubmission = new Models.FormModel();
+    private List<Models.FormModel> entries = new List<Models.FormModel>();
     private byte[] image = null;
 
     private void HandleValidSubmit()
     {
         QRCoder.QRCodeGenerator qrGenerator = new QRCoder.QRCodeGenerator();
         QRCoder.QRCodeData qrData = qrGenerator.CreateQrCode(
-            String.Format("Name: {0}\nE-Mail: {1}\nTwitter: {2}\nGitHub: {3}",
-                formSubmission.Name,
-                formSubmission.Email,
-                formSubmission.Twitter,
-                formSubmission.Github),
+            buildQRString(),
             QRCoder.QRCodeGenerator.ECCLevel.Q);
         QRCoder.PngByteQRCode qrCode = new QRCoder.PngByteQRCode(qrData);
         this.image = qrCode.GetGraphic(20);
+    }
+
+    private void removeEntry(int index)
+    {
+        entries.RemoveAt(index);
+        image = null;
+    }
+
+    private void addEntry()
+    {
+        if (image != null) image = null;
+        entries.Add(new Models.FormModel());
+    }
+
+    private string buildQRString()
+    {
+        return String.Join("", entries);
     }
 
 }

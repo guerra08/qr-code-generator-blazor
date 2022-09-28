@@ -7,29 +7,29 @@
 </div>
 
 <div class="form-container">
-    <EditForm Model="@entries" OnValidSubmit="@HandleValidSubmit">
+    <EditForm Model="@_entries" OnValidSubmit="@HandleValidSubmit">
         <DataAnnotationsValidator />
         <ValidationSummary />
         <div class="form-row add-button">
-            <button type="button" class="btn btn-secondary" @onclick="@(() => addEntry())">Add Data</button>
+            <button type="button" class="btn btn-secondary" @onclick="@(AddEntry)">Add Data</button>
         </div>
-        @for (var i = 0; i < entries.Count; i++)
+        @for (var i = 0; i < _entries.Count; i++)
         {
             var index = i;
 
             <div class="form-row">
                 <div class="form-group col-md-6">
-                    <InputText id="name" class="form-control" placeholder="Name" @bind-Value="entries[index].Name" required />
+                    <InputText id="name" class="form-control" placeholder="Name" @bind-Value="_entries[index].Name" required />
                 </div>
                 <div class="form-group col-md-6">
-                    <InputText id="content" class="form-control" type="text" placeholder="Content" @bind-Value="entries[index].Content" required />
+                    <InputText id="content" class="form-control" type="text" placeholder="Content" @bind-Value="_entries[index].Content" required />
                 </div>
                 <div class="form-group col-md-6">
-                    <button type="button" class="btn btn-warning" @onclick="@(() => removeEntry(index))">Remove data</button>
+                    <button type="button" class="btn btn-warning" @onclick="@(() => RemoveEntry(index))">Remove data</button>
                 </div>
             </div>
         }
-        @if (entries.Count > 0)
+        @if (_entries.Count > 0)
         {
             <div class="form-buttons">
                 <button type="submit" class="btn btn-primary">Create</button>
@@ -39,53 +39,53 @@
     </EditForm>
 </div>
 
-@if (image != null && entries.Count > 0)
+@if (_image is not null && _entries.Count > 0)
 {
     <div class="card-qr-container">
         <div class="card" style="width: 18rem;">
             <div class="card-body">
-                @foreach (var entry in entries)
+                @foreach (var entry in _entries)
                 {
                     <p class="card-text"><strong>@entry.Name:</strong> @entry.Content</p>
                 }
             </div>
         </div>
         <div class="qr-container">
-            <img src="data:image/png;base64,@Convert.ToBase64String(image)">
+            <img src="data:image/png;base64,@Convert.ToBase64String(_image)" alt="QR Code">
         </div>
     </div>
 }
 
 @code{
 
-    private List<Models.FormModel> entries = new List<Models.FormModel>();
-    private byte[] image = null;
+    private readonly List<Models.FormModel> _entries = new();
+    private byte[]? _image;
 
     private void HandleValidSubmit()
     {
-        QRCoder.QRCodeGenerator qrGenerator = new QRCoder.QRCodeGenerator();
-        QRCoder.QRCodeData qrData = qrGenerator.CreateQrCode(
-            buildQRString(),
+        var qrGenerator = new QRCoder.QRCodeGenerator();
+        var qrData = qrGenerator.CreateQrCode(
+            BuildQrString(),
             QRCoder.QRCodeGenerator.ECCLevel.Q);
-        QRCoder.PngByteQRCode qrCode = new QRCoder.PngByteQRCode(qrData);
-        this.image = qrCode.GetGraphic(20);
+        var qrCode = new QRCoder.PngByteQRCode(qrData);
+        _image = qrCode.GetGraphic(20);
     }
 
-    private void removeEntry(int index)
+    private void RemoveEntry(int index)
     {
-        entries.RemoveAt(index);
-        image = null;
+        _entries.RemoveAt(index);
+        _image = null;
     }
 
-    private void addEntry()
+    private void AddEntry()
     {
-        if (image != null) image = null;
-        entries.Add(new Models.FormModel());
+        if (_image is not null) _image = null;
+        _entries.Add(new Models.FormModel());
     }
 
-    private string buildQRString()
+    private string BuildQrString()
     {
-        return String.Join("", entries);
+        return string.Join("", _entries);
     }
 
 }

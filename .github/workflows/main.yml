@@ -10,9 +10,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Setup .NET Core SDK
-        uses: actions/setup-dotnet@v1.7.2
+        uses: actions/setup-dotnet@v2.1.1
         with:
-          dotnet-version: '6'
+          dotnet-version: '6.0'
       - name: Publish .NET Core Project
         run: dotnet publish QRCodeGenerator/QRCodeGenerator.csproj -c Release -o release --nologo
       - name: Change base-tag in index.html from / to BlazorGitHubPagesDemo
@@ -20,7 +20,7 @@ jobs:
       - name: Add .nojekyll file
         run: touch release/wwwroot/.nojekyll
       - name: Commit wwwroot to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@3.7.1
+        uses: JamesIves/github-pages-deploy-action@4.4.0
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages

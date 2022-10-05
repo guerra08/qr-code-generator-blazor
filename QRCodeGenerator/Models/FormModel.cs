@@ -5,14 +5,9 @@ namespace QRCodeGenerator.Models
     public class FormModel
     {
         [Required]
-        public string Name { get; set; }
+        public string Key { get; set; }
         [Required]
-        public string Content { get; set; }
-
-        public override string ToString()
-        {
-            return Name + ": " + Content + "\n";
-        }
+        public string Value { get; set; }
 
     }
 }

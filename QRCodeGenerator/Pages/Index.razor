@@ -1,4 +1,6 @@
 ﻿@page "/"
+@using QRCodeGenerator.Models
+@using QRCoder
 
 <div class="title-container">
     <h1 style="text-align: center">QR Code Generator</h1>
@@ -6,84 +8,98 @@
     <h4 style="text-align: center">Simply add pairs of titles and data and generate the QR code.</h4>
 </div>
 
-<div class="form-container">
-    <EditForm Model="@_entries" OnValidSubmit="@HandleValidSubmit">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
-        <div class="form-row add-button">
-            <button type="button" class="btn btn-secondary" @onclick="@(AddEntry)">Add Data</button>
-        </div>
-        @for (var i = 0; i < _entries.Count; i++)
-        {
-            var index = i;
+@if (_image is null)
+{
+    <div class="form-container">
+        <EditForm Model="@_entries" OnValidSubmit="@GenerateQrCode">
+            <DataAnnotationsValidator/>
+            <ValidationSummary/>
+            @if (_entries.Count == 0)
+            {
+                <div class="form-row add-button">
+                    <button type="button" class="btn btn-secondary" @onclick="@(AddEntry)">Start</button>
+                </div>
+            }
+            @for (var i = 0; i < _entries.Count; i++)
+            {
+                var index = i;
 
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <InputText id="name" class="form-control" placeholder="Name" @bind-Value="_entries[index].Name" required />
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <InputText id="key" class="form-control" placeholder="Key" @bind-Value="_entries[index].Key" required/>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <InputText id="value" class="form-control" type="text" placeholder="Value" @bind-Value="_entries[index].Value" required/>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <button type="button" class="btn btn-warning" @onclick="@(() => RemoveEntry(index))">Remove data</button>
+                    </div>
                 </div>
-                <div class="form-group col-md-6">
-                    <InputText id="content" class="form-control" type="text" placeholder="Content" @bind-Value="_entries[index].Content" required />
+            }
+            @if (_entries.Count > 0)
+            {
+                <div class="form-buttons">
+                    <button type="submit" class="btn btn-primary">Generate</button>
+                    <button type="reset" class="btn btn-danger">Clear</button>
                 </div>
-                <div class="form-group col-md-6">
-                    <button type="button" class="btn btn-warning" @onclick="@(() => RemoveEntry(index))">Remove data</button>
-                </div>
-            </div>
-        }
-        @if (_entries.Count > 0)
-        {
-            <div class="form-buttons">
-                <button type="submit" class="btn btn-primary">Create</button>
-                <button type="reset" class="btn btn-danger">Cancel</button>
-            </div>
-        }
-    </EditForm>
-</div>
+            }
+        </EditForm>
+    </div>
+}
 
 @if (_image is not null && _entries.Count > 0)
 {
     <div class="card-qr-container">
+        <div class="qr-container">
+            <img src="data:image/png;base64,@Convert.ToBase64String(_image)" alt="QR Code">
+        </div>
         <div class="card" style="width: 18rem;">
             <div class="card-body">
                 @foreach (var entry in _entries)
                 {
-                    <p class="card-text"><strong>@entry.Name:</strong> @entry.Content</p>
+                    <p class="card-text">
+                        <strong>@entry.Key:</strong> @entry.Value
+                    </p>
                 }
             </div>
         </div>
-        <div class="qr-container">
-            <img src="data:image/png;base64,@Convert.ToBase64String(_image)" alt="QR Code">
-        </div>
+        <button type="reset" class="btn btn-danger" @onclick="@(ClearQrCode)">Clear</button>
     </div>
 }
 
-@code{
+@code
+{
 
-    private readonly List<Models.FormModel> _entries = new();
+    private readonly List<FormModel> _entries = new();
     private byte[]? _image;
 
-    private void HandleValidSubmit()
+    private void GenerateQrCode()
     {
-        var qrGenerator = new QRCoder.QRCodeGenerator();
+        var qrGenerator = new QRCodeGenerator();
         var qrData = qrGenerator.CreateQrCode(
-            BuildQrString(),
-            QRCoder.QRCodeGenerator.ECCLevel.Q);
-        var qrCode = new QRCoder.PngByteQRCode(qrData);
+            BuildQrCodeString(),
+            QRCodeGenerator.ECCLevel.Q);
+        var qrCode = new PngByteQRCode(qrData);
         _image = qrCode.GetGraphic(20);
+    }
+    
+    private void ClearQrCode()
+    {
+        _entries.Clear();
+        _image = null;
     }
 
     private void RemoveEntry(int index)
     {
         _entries.RemoveAt(index);
-        _image = null;
     }
 
     private void AddEntry()
     {
-        if (_image is not null) _image = null;
-        _entries.Add(new Models.FormModel());
+        _entries.Add(new FormModel());
     }
 
-    private string BuildQrString()
+    private string BuildQrCodeString()
     {
         return string.Join("", _entries);
     }
